@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static play.roulette.Constants.lowMidHighRouletteNumbers;
 
@@ -27,7 +28,7 @@ public class RecentLowMidHighStrategy extends ProbabilisticOutcomeStrategy {
 
     @Override
     public Set<RouletteNumber> getProbables() {
-        List<RouletteNumber> previousOutcomes = this.getStatistics().getPreviousOutcomes();
+        ConcurrentLinkedQueue<RouletteNumber> previousOutcomes = this.getStatistics().getPreviousOutcomes();
         Set<RouletteNumber> predictedNumbers = null;
 
         if (previousOutcomes == null || previousOutcomes.size() == 0) return null;
@@ -38,7 +39,7 @@ public class RecentLowMidHighStrategy extends ProbabilisticOutcomeStrategy {
         }
 
         // Get the most recent outcomes
-        List<RouletteNumber> recentOutcomes = previousOutcomes.subList(previousOutcomes.size() - WINDOW_SIZE, previousOutcomes.size());
+        List<RouletteNumber> recentOutcomes = new ArrayList<>(previousOutcomes).subList(previousOutcomes.size() - WINDOW_SIZE, previousOutcomes.size());
 
         // Check for the presence of conflicting patterns in the recent outcomes
         int recentLowCount = recentCountInRange(recentOutcomes, 1, 12);
@@ -47,7 +48,7 @@ public class RecentLowMidHighStrategy extends ProbabilisticOutcomeStrategy {
 
         // If there is a conflicting pattern, guess the opposite of the last outcome
         if (recentLowCount > 0 && recentMidCount > 0 && recentHighCount > 0) {
-            int lastOutcome = Integer.parseInt(previousOutcomes.get(previousOutcomes.size() - 1).getNumber());
+            int lastOutcome = Integer.parseInt(previousOutcomes.peek().getNumber());
             if (lastOutcome <= 12) {
                 predictedNumbers = lowMidHighRouletteNumbers(LowMidHighRange.LOW);
             } else if (lastOutcome > 12 && lastOutcome <= 24) {

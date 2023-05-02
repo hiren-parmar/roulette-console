@@ -7,13 +7,13 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import play.roulette.concurrent.SimulationManager;
 import play.roulette.strategy.HotNumbersStrategy;
 import play.roulette.strategy.LawOfLargeNumbersStrategy;
 import play.roulette.strategy.LawOfThirdsStrategy;
 import play.roulette.strategy.OutcomeProbabilityStrategy;
 import play.roulette.strategy.PivotStrategy;
 import play.roulette.strategy.ProbabilisticOutcomeStrategy;
-import play.roulette.strategy.ProbableNextOutcomeStrategy;
 import play.roulette.strategy.RecentBlackRedStrategy;
 import play.roulette.strategy.RecentEvenOddStrategy;
 import play.roulette.strategy.RecentLowMidHighStrategy;
@@ -22,7 +22,9 @@ import play.roulette.strategy.RecentTopBottomStrategy;
 
 public class App {
 
-    public static final int SIMULATION_ROUNDS = 1_000_000;
+    public static final int SIMULATION_ROUNDS = 40;
+    public static final int NUM_THREADS = SIMULATION_ROUNDS / 10;
+    private static final int ROUNDS_PER_THREAD = SIMULATION_ROUNDS / NUM_THREADS;
 
     public static void main(String[] args) {
         Constants.init();
@@ -47,6 +49,24 @@ public class App {
             strategyPoints.put(strategy, 0);
         }
 
+        parallelSimulationBasedPlay(game, strategyPoints, predictingStrategies);
+    }
+
+    public static void parallelSimulationBasedPlay(Game game, Map<ProbabilisticOutcomeStrategy,
+            Integer> strategyPoints, Set<ProbabilisticOutcomeStrategy> predictingStrategies) {
+
+        SimulationManager manager = new SimulationManager(game, predictingStrategies, 10, 1_000);
+        try {
+            manager.runSimulationAndShowResult(strategyPoints);
+        }
+        catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void promptSimulationBasedPlay(Game game,
+                                        Set<ProbabilisticOutcomeStrategy> predictingStrategies,
+                                        Map<ProbabilisticOutcomeStrategy, Integer> strategyPoints) {
         Scanner scanner = new Scanner(System.in);
         String input = "";
         System.out.print("Start Game?: y/N \n");

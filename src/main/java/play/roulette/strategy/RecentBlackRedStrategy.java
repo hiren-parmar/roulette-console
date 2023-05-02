@@ -3,9 +3,11 @@ package play.roulette.strategy;
 import play.roulette.RouletteNumber;
 import play.roulette.Statistics;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static play.roulette.Constants.blackRedRouletteNumbers;
 
@@ -25,7 +27,7 @@ public class RecentBlackRedStrategy extends ProbabilisticOutcomeStrategy {
 
     @Override
     public Set<RouletteNumber> getProbables() {
-        List<RouletteNumber> previousOutcomes = this.getStatistics().getPreviousOutcomes();
+        ConcurrentLinkedQueue<RouletteNumber> previousOutcomes = this.getStatistics().getPreviousOutcomes();
         Set<RouletteNumber> predictedNumbers = null;
 
         if (previousOutcomes == null || previousOutcomes.size() == 0) return null;
@@ -36,14 +38,14 @@ public class RecentBlackRedStrategy extends ProbabilisticOutcomeStrategy {
         }
 
         // Get the most recent outcomes
-        List<RouletteNumber> recentOutcomes = previousOutcomes.subList(previousOutcomes.size() - WINDOW_SIZE, previousOutcomes.size());
+        List<RouletteNumber> recentOutcomes = new ArrayList<>(previousOutcomes).subList(previousOutcomes.size() - WINDOW_SIZE, previousOutcomes.size());
 
         // Check for the presence of conflicting patterns in the recent outcomes
         int recentBlacks = recentBlacks(recentOutcomes);
 
         // If there is a conflicting pattern, guess the opposite of the last outcome
         if (recentBlacks == 0) {
-            recentBlacks = lastWasBlack(previousOutcomes);
+            recentBlacks = lastWasBlack(previousOutcomes.peek());
         }
 
         // Otherwise, check for the presence of at least 3 black or red numbers
@@ -79,8 +81,7 @@ public class RecentBlackRedStrategy extends ProbabilisticOutcomeStrategy {
         return 0;
     }
 
-    private int lastWasBlack(List<RouletteNumber> previousOutcomes) {
-        RouletteNumber lastOutcome = previousOutcomes.get(previousOutcomes.size() - 1);
+    private int lastWasBlack(RouletteNumber lastOutcome) {
         return lastOutcome.isZero() ? 0 : lastOutcome.isRed() ? -1 : 1;
     }
 }

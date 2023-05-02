@@ -3,9 +3,9 @@ package play.roulette.strategy;
 import play.roulette.RouletteNumber;
 import play.roulette.Statistics;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class LawOfLargeNumbersStrategy extends ProbabilisticOutcomeStrategy {
 
@@ -24,7 +24,7 @@ public class LawOfLargeNumbersStrategy extends ProbabilisticOutcomeStrategy {
     @Override
     public Set<RouletteNumber> getProbables() {
         Statistics stats = getStatistics();
-        Set<RouletteNumber> probables = new HashSet<>();
+        Set<RouletteNumber> probables = new ConcurrentSkipListSet<>();
         Map<RouletteNumber, Integer> previousOutcomesWithCount = stats.getPreviousOutcomesWithCount();
         int totalOutcomes = stats.getNumberOfGames();
 //        int sampleCount = Math.min(sampleSize, totalOutcomes);

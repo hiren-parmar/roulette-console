@@ -3,9 +3,9 @@ package play.roulette;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static play.roulette.Constants.BLACK_KEY;
 import static play.roulette.Constants.BOTTOM_KEY;
@@ -24,7 +24,7 @@ public class Statistics {
     private int numberOfGames; // number of previous games to track
     private int numberOfHotColdNumbers;
     private Map<RouletteNumber, Integer> previousOutcomesWithCount; // list of previous game outcomes
-    private List<RouletteNumber> previousOutcomes; // list of previous game outcomes
+    private ConcurrentLinkedQueue<RouletteNumber> previousOutcomes; // list of previous game outcomes
     private Map<String, Integer> evenOddStats; // count of even/odd outcomes
     private Map<String, Integer> blackRedStats; // count of black/red outcomes
     private Map<String, Integer> topBottomStats; // count of top 18/bottom 18/middle outcomes
@@ -37,7 +37,7 @@ public class Statistics {
         this.numberOfGames = numberOfGames;
         this.numberOfHotColdNumbers = numberOfHotColdNumbers;
         this.previousOutcomesWithCount = new LinkedHashMap<>();
-        this.previousOutcomes = new LinkedList<>();
+        this.previousOutcomes = new ConcurrentLinkedQueue<>();
         this.evenOddStats = new HashMap<>();
         this.blackRedStats = new HashMap<>();
         this.topBottomStats = new HashMap<>();
@@ -59,7 +59,7 @@ public class Statistics {
         return this.previousOutcomesWithCount;
     }
 
-    public List<RouletteNumber> getPreviousOutcomes() {
+    public ConcurrentLinkedQueue<RouletteNumber> getPreviousOutcomes() {
         return previousOutcomes;
     }
 

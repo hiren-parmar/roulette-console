@@ -3,9 +3,9 @@ package play.roulette.strategy;
 import play.roulette.RouletteNumber;
 import play.roulette.Statistics;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import static play.roulette.Constants.EVEN_KEY;
 import static play.roulette.Constants.ODD_KEY;
@@ -21,7 +21,7 @@ public class EvenOddStrategy extends ProbabilisticOutcomeStrategy {
 
     @Override
     public Set<RouletteNumber> getProbables() {
-        Set<RouletteNumber> predictedNumbers = new HashSet<>();
+        Set<RouletteNumber> predictedNumbers = new ConcurrentSkipListSet<>();
         Map<String, Integer> evenOddStats = this.getStatistics().getEvenOddStats();
         if (evenOddStats == null || evenOddStats.size() == 0) return null;
         int evenCount = evenOddStats.containsKey(EVEN_KEY) ? evenOddStats.get(EVEN_KEY) : 0;

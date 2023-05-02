@@ -5,10 +5,11 @@ import play.roulette.Statistics;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import static play.roulette.Constants.MAX_ROULETTE_NUMBER;
 
@@ -24,8 +25,8 @@ public class HotNumbersStrategy extends ProbabilisticOutcomeStrategy {
 
     @Override
     public Set<RouletteNumber> getProbables() {
-        List<RouletteNumber> previousOutcomes = this.getStatistics().getPreviousOutcomes();
-        Set<RouletteNumber> predictedNumbers = new HashSet<>();
+        ConcurrentLinkedQueue<RouletteNumber> previousOutcomes = this.getStatistics().getPreviousOutcomes();
+        Set<RouletteNumber> predictedNumbers = new ConcurrentSkipListSet<>();
 
         if (previousOutcomes == null || previousOutcomes.isEmpty()) return null;
 
@@ -33,21 +34,21 @@ public class HotNumbersStrategy extends ProbabilisticOutcomeStrategy {
         double averageCount = (double) previousOutcomes.size() / MAX_ROULETTE_NUMBER;
 
         // Get the recent outcomes with counts
-        List<RouletteNumber> recentOutcomes = new ArrayList<>();
+        List<RouletteNumber> recentOutcomesWithAvgCount = new ArrayList<>();
         for (Map.Entry<RouletteNumber, Integer> entry : this.getStatistics().getPreviousOutcomesWithCount().entrySet()) {
             if (entry.getValue() > averageCount) {
-                recentOutcomes.add(entry.getKey());
+                recentOutcomesWithAvgCount.add(entry.getKey());
             }
         }
 
         // If there are not enough recent outcomes, return empty list
-        if (recentOutcomes.size() < 3) {
+        if (recentOutcomesWithAvgCount.size() < 3) {
             return Collections.emptySet();
         }
 
         // Check for hot numbers
         for (RouletteNumber hotNumber : this.getStatistics().getHotNumbers()) {
-            if (recentOutcomes.contains(hotNumber)) {
+            if (recentOutcomesWithAvgCount.contains(hotNumber)) {
                 predictedNumbers.add(hotNumber);
             }
         }

@@ -4,10 +4,10 @@ import play.roulette.RouletteNumber;
 import play.roulette.Statistics;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 public class OutcomeProbabilityStrategy extends ProbabilisticOutcomeStrategy {
@@ -25,8 +25,8 @@ public class OutcomeProbabilityStrategy extends ProbabilisticOutcomeStrategy {
 
     @Override
     public Set<RouletteNumber> getProbables() {
-        List<RouletteNumber> previousOutcomes = this.getStatistics().getPreviousOutcomes();
-        Map<RouletteNumber, Integer> frequencyMap = new HashMap<>();
+        ConcurrentLinkedQueue<RouletteNumber> previousOutcomes = this.getStatistics().getPreviousOutcomes();
+        Map<RouletteNumber, Integer> frequencyMap = new ConcurrentHashMap<>();
 
         // Count the frequency of each number's occurrence in the previous outcomes
         for (RouletteNumber outcome : previousOutcomes) {
@@ -34,7 +34,7 @@ public class OutcomeProbabilityStrategy extends ProbabilisticOutcomeStrategy {
         }
 
         // Calculate the probability of each number appearing in the next outcome
-        Map<RouletteNumber, Double> probabilityMap = new HashMap<>();
+        Map<RouletteNumber, Double> probabilityMap = new ConcurrentHashMap<>();
         int totalOutcomes = previousOutcomes.size();
         for (RouletteNumber number : previousOutcomes) {
             int frequency = frequencyMap.getOrDefault(number, 0);

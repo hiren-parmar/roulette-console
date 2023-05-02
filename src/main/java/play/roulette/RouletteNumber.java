@@ -2,18 +2,21 @@ package play.roulette;
 
 import java.util.Objects;
 
+import static play.roulette.Constants.BLACK_KEY;
 import static play.roulette.Constants.GREENS;
 import static play.roulette.Constants.GREEN_0;
 import static play.roulette.Constants.GREEN_00;
 import static play.roulette.Constants.GREEN_00_STRING;
 import static play.roulette.Constants.GREEN_0_STRING;
+import static play.roulette.Constants.GREEN_KEY;
 import static play.roulette.Constants.REDS;
+import static play.roulette.Constants.RED_KEY;
 import static play.roulette.Constants.init;
 import static play.roulette.Constants.printBlackBox;
 import static play.roulette.Constants.printGreenBox;
 import static play.roulette.Constants.printRedBox;
 
-public class RouletteNumber {
+public class RouletteNumber implements Comparable<RouletteNumber> {
     private final String number;
     private final String boxedNumber;
     private final int numeric;
@@ -27,6 +30,8 @@ public class RouletteNumber {
     private final boolean bottom;
     private final boolean zero;
     private double probability;
+
+    private String color;
 
     public RouletteNumber(String number) {
         int intNumber;
@@ -140,6 +145,18 @@ public class RouletteNumber {
     public int getNumeric() {
         return numeric;
     }
+    public String getColor() {
+        if (this.isGreen()) {
+            this.color = GREEN_KEY;
+        }
+        if (this.isRed()) {
+            this.color = RED_KEY;
+        }
+        if (this.color == null || this.color.equals("")) {
+            this.color = BLACK_KEY;
+        }
+        return color;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -152,6 +169,11 @@ public class RouletteNumber {
     @Override
     public int hashCode() {
         return Objects.hash(number);
+    }
+
+    @Override
+    public int compareTo(RouletteNumber number) {
+        return number.getNumber().compareTo(this.getNumber());
     }
 }
 

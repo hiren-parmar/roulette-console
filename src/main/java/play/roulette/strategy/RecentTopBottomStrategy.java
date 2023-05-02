@@ -4,8 +4,8 @@ import play.roulette.RouletteNumber;
 import play.roulette.Statistics;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static play.roulette.Constants.topBottomRouletteNumbers;
 
@@ -24,13 +24,13 @@ public class RecentTopBottomStrategy extends ProbabilisticOutcomeStrategy {
 
     @Override
     public Set<RouletteNumber> getProbables() {
-        List<RouletteNumber> previousOutcomes = this.getStatistics().getPreviousOutcomes();
+        ConcurrentLinkedQueue<RouletteNumber> previousOutcomes = this.getStatistics().getPreviousOutcomes();
         Set<RouletteNumber> predictedNumbers = null;
 
         if (previousOutcomes == null || previousOutcomes.size() == 0) return null;
 
         // Get the most recent outcome
-        RouletteNumber recentOutcome = previousOutcomes.get(previousOutcomes.size() - 1);
+        RouletteNumber recentOutcome = previousOutcomes.peek();
 
         // Check if the recent outcome falls in the top or bottom half of numbers
         if (recentOutcome.isTop()) {

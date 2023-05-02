@@ -4,9 +4,9 @@ import play.roulette.Constants;
 import play.roulette.RouletteNumber;
 import play.roulette.Statistics;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import static play.roulette.Constants.PIVOT_MAX_LOSSES;
 import static play.roulette.Constants.allRouletteNumbers;
@@ -31,15 +31,17 @@ public class PivotStrategy extends ProbabilisticOutcomeStrategy {
 
     @Override
     public Set<RouletteNumber> getProbables() {
-        List<RouletteNumber> history = getStatistics().getPreviousOutcomes();
-        Set<RouletteNumber> probables = new HashSet<>();
-        if (history.size() < 1) {
+        ConcurrentLinkedQueue<RouletteNumber> previousOutcomes = getStatistics().getPreviousOutcomes();
+        Set<RouletteNumber> probables = new ConcurrentSkipListSet<>();
+        if (previousOutcomes.size() < 1) {
             return allRouletteNumbers();
         }
-        RouletteNumber lastResult = history.get(history.size() - 1);
+        RouletteNumber lastResult = previousOutcomes.peek();
         if (lastResult.getNumeric() == this.pivot) {
-            int i = history.size() - 2;
-            while (i >= 0 && history.get(i).getNumeric() != this.pivot) {
+            int i = previousOutcomes.size() - 2;
+
+            RouletteNumber[] previousOutcomesAsArray = (RouletteNumber[]) previousOutcomes.toArray();
+            while (i >= 0 && previousOutcomesAsArray[i].getNumeric() != this.pivot) {
                 i--;
             }
             if (i < 0) {
@@ -54,7 +56,7 @@ public class PivotStrategy extends ProbabilisticOutcomeStrategy {
             this.consecutiveLosses++;
             if (this.consecutiveLosses >= PIVOT_MAX_LOSSES) {
                 this.consecutiveLosses = 0;
-                int betIndex = history.size() % Constants.allRouletteNumbers().size();
+                int betIndex = previousOutcomes.size() % Constants.allRouletteNumbers().size();
                 RouletteNumber bet = Constants.allRouletteNumbersAsList().get(betIndex);
                 probables.add(bet);
                 return probables;

@@ -24,4 +24,8 @@ public abstract class ProbabilisticOutcomeStrategy {
         return "According to " + getStrategyName() + " probable numbers are " + getProbables().stream().map(RouletteNumber::getBoxedNumber).collect(
                 Collectors.joining(", "));
     }
+
+    public boolean win(RouletteNumber outcome) {
+        return getProbables().contains(outcome);
+    }
 }

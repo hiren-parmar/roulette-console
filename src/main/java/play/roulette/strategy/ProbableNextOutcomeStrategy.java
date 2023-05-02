@@ -3,13 +3,13 @@ package play.roulette.strategy;
 import play.roulette.RouletteNumber;
 import play.roulette.Statistics;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,12 +39,12 @@ public class ProbableNextOutcomeStrategy extends ProbabilisticOutcomeStrategy {
 
         @Override
         public Set<RouletteNumber> getProbables() {
-            List<RouletteNumber> previousOutcomes = new ArrayList<>(getStatistics().getPreviousOutcomesWithCount().keySet());
+            ConcurrentLinkedQueue<RouletteNumber> previousOutcomes = getStatistics().getPreviousOutcomes();
 
             Map<RouletteNumber, Long> numberFrequencies = previousOutcomes.stream()
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-            Map<String, Map<String, Long>> categoryFrequencies = new HashMap<>();
+            Map<String, Map<String, Long>> categoryFrequencies = new ConcurrentHashMap<>();
 
             // Calculate frequencies of red/black, even/odd, high/low
             categoryFrequencies.put("color", previousOutcomes.stream()
@@ -90,7 +90,7 @@ public class ProbableNextOutcomeStrategy extends ProbabilisticOutcomeStrategy {
             }
 
             // Calculate probability of the next outcome
-            Map<RouletteNumber, Double> outcomeProbabilities = new HashMap<>();
+            Map<RouletteNumber, Double> outcomeProbabilities = new ConcurrentHashMap<>();
 
             for (int i = 0; i <= 36; i++) {
                 RouletteNumber number = new RouletteNumber(String.format("%02d", i));
